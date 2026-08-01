@@ -1,16 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { fetchWeather, geocodePlace } from "./weather.server";
+import type { WeatherPayload } from "./weather.server";
 
 export const getWeatherForQuery = createServerFn({ method: "POST" })
   .inputValidator((input) =>
     z.object({ query: z.string().min(1).max(120) }).parse(input),
   )
-  .handler(async ({ data }) => {
-    const { fetchWeather: run, geocodePlace: geo } = await import(
-      "./weather.server"
-    );
-    return run(await geo(data.query));
+  .handler(async ({ data }): Promise<WeatherPayload> => {
+    const { fetchWeather, geocodePlace } = await import("./weather.server");
+    return fetchWeather(await geocodePlace(data.query));
   });
 
 export const getWeatherForCoords = createServerFn({ method: "POST" })
@@ -23,11 +21,7 @@ export const getWeatherForCoords = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
-    const { fetchWeather: run } = await import("./weather.server");
-    return run({ name: data.name, lat: data.lat, lng: data.lng });
+  .handler(async ({ data }): Promise<WeatherPayload> => {
+    const { fetchWeather } = await import("./weather.server");
+    return fetchWeather({ name: data.name, lat: data.lat, lng: data.lng });
   });
-
-export type { WeatherPayload } from "./weather.server";
-void fetchWeather;
-void geocodePlace;
