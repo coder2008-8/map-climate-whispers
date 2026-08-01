@@ -37,7 +37,7 @@ const FAVORITES = ["New York", "Tokyo", "London", "Reykjavik", "Sydney", "Cairo"
 
 type Target =
   | { kind: "query"; query: string }
-  | { kind: "coords"; name: string; lat: number; lng: number };
+  | { kind: "coords"; name?: string; lat: number; lng: number };
 
 function Index() {
   const [target, setTarget] = useState<Target>({
