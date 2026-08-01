@@ -71,6 +71,9 @@ async function gatewayFetch(path: string, init?: RequestInit) {
       }
     }
     console.error(`Gateway request failed [${response.status}]: ${body}`);
+    if (response.status === 404) {
+      throw new Error("NOT_SUPPORTED_LOCATION");
+    }
     throw new Error(`Weather lookup failed [${response.status}]: ${body}`);
   }
   return response.json() as Promise<Record<string, unknown>>;
