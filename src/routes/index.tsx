@@ -158,7 +158,9 @@ function Index() {
                   lat={data?.place.lat ?? 40.7128}
                   lng={data?.place.lng ?? -74.006}
                   label={data?.place.name ?? "New York"}
-                  onPick={(p) => setTarget({ kind: "coords", ...p })}
+                  onPick={(p) =>
+                    setTarget({ kind: "coords", lat: p.lat, lng: p.lng })
+                  }
                 />
               </Suspense>
             </ClientOnly>
