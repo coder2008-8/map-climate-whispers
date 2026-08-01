@@ -37,7 +37,7 @@ const FAVORITES = ["New York", "Tokyo", "London", "Reykjavik", "Sydney", "Cairo"
 
 type Target =
   | { kind: "query"; query: string }
-  | { kind: "coords"; name: string; lat: number; lng: number };
+  | { kind: "coords"; name?: string; lat: number; lng: number };
 
 function Index() {
   const [target, setTarget] = useState<Target>({
@@ -53,13 +53,17 @@ function Index() {
       target.kind === "query"
         ? byQuery({ data: { query: target.query } })
         : byCoords({
-            data: { name: target.name, lat: target.lat, lng: target.lng },
+            data: {
+              ...(target.name ? { name: target.name } : {}),
+              lat: target.lat,
+              lng: target.lng,
+            },
           }),
     staleTime: 5 * 60 * 1000,
   });
 
   const activeLabel =
-    target.kind === "query" ? target.query : target.name;
+    target.kind === "query" ? target.query : (target.name ?? data?.place.name);
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -75,7 +79,11 @@ function Index() {
           </div>
           <PlaceSearch
             onSelect={(query) => setTarget({ kind: "query", query })}
+            onSelectCoords={({ lat, lng }) =>
+              setTarget({ kind: "coords", lat, lng })
+            }
           />
+
         </header>
 
         <nav className="mt-6 flex flex-wrap gap-2">
@@ -150,7 +158,9 @@ function Index() {
                   lat={data?.place.lat ?? 40.7128}
                   lng={data?.place.lng ?? -74.006}
                   label={data?.place.name ?? "New York"}
-                  onPick={(p) => setTarget({ kind: "coords", ...p })}
+                  onPick={(p) =>
+                    setTarget({ kind: "coords", lat: p.lat, lng: p.lng })
+                  }
                 />
               </Suspense>
             </ClientOnly>

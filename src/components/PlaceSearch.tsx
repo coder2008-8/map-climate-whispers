@@ -1,19 +1,24 @@
 import { useEffect, useRef, useState } from "react";
+import { formatCoords, parseCoordinates } from "@/lib/coords";
 
 type Suggestion = { label: string; placeId: string };
 
 export default function PlaceSearch({
   onSelect,
+  onSelectCoords,
 }: {
   onSelect: (query: string) => void;
+  onSelectCoords: (coords: { lat: number; lng: number }) => void;
 }) {
   const [value, setValue] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
   const tokenRef = useRef<any>(null);
 
+  const coords = parseCoordinates(value);
+
   useEffect(() => {
-    if (value.trim().length < 3) {
+    if (coords || value.trim().length < 3) {
       setSuggestions([]);
       return;
     }
@@ -42,13 +47,19 @@ export default function PlaceSearch({
       }
     }, 250);
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   const commit = (query: string) => {
     if (!query.trim()) return;
+    const parsed = parseCoordinates(query);
     setValue(query);
     setOpen(false);
     tokenRef.current = null;
+    if (parsed) {
+      onSelectCoords(parsed);
+      return;
+    }
     onSelect(query);
   };
 
@@ -65,12 +76,23 @@ export default function PlaceSearch({
           onChange={(e) => setValue(e.target.value)}
           onFocus={() => suggestions.length && setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Search any city…"
-          aria-label="Search any city"
+          placeholder="Search a city or coordinates…"
+          aria-label="Search a city or enter coordinates"
           className="w-full rounded-full border border-border bg-card/70 px-5 py-3 text-sm text-foreground outline-none backdrop-blur placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/40"
         />
       </form>
-      {open && suggestions.length > 0 && (
+      {coords && (
+        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-border bg-popover shadow-xl">
+          <button
+            type="button"
+            onMouseDown={() => commit(value)}
+            className="w-full px-5 py-3 text-left text-sm text-popover-foreground transition-colors hover:bg-accent"
+          >
+            Use coordinates · {formatCoords(coords)}
+          </button>
+        </div>
+      )}
+      {!coords && open && suggestions.length > 0 && (
         <ul className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-border bg-popover shadow-xl">
           {suggestions.map((s) => (
             <li key={s.placeId}>

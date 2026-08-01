@@ -102,6 +102,29 @@ export async function geocodePlace(query: string): Promise<Place> {
   };
 }
 
+/** Turns raw coordinates into a human-readable place name. */
+export async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
+  try {
+    const data = (await gatewayFetch(
+      `maps/api/geocode/json?latlng=${lat},${lng}&result_type=locality|administrative_area_level_1|country`,
+      { headers: headers() },
+    )) as {
+      results?: Array<{
+        formatted_address: string;
+        address_components?: Array<{ long_name: string; types: string[] }>;
+      }>;
+    };
+    const first = data.results?.[0];
+    if (!first) return null;
+    const locality = first.address_components?.find((c) =>
+      c.types.includes("locality"),
+    )?.long_name;
+    return locality ?? first.formatted_address;
+  } catch {
+    return null;
+  }
+}
+
 function titleCase(value: string) {
   return value
     .toLowerCase()
