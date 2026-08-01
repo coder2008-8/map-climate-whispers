@@ -3,6 +3,10 @@ export type Coords = { lat: number; lng: number };
 const DECIMAL =
   /^\s*(-?\d{1,3}(?:\.\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/;
 
+/** "12.9716° N, 77.5946° E" — decimal degrees with an optional ° and hemisphere letter. */
+const DECIMAL_HEMI =
+  /^\s*(-?\d{1,3}(?:\.\d+)?)\s*°?\s*([NSns])\s*[,;\s]\s*(-?\d{1,3}(?:\.\d+)?)\s*°?\s*([EWew])\s*$/;
+
 const DMS =
   /^\s*(\d{1,3})(?:°|\s)\s*(\d{1,2}(?:\.\d+)?)?['′\s]*\s*(\d{1,2}(?:\.\d+)?)?["″]?\s*([NSns])\s*[, ]\s*(\d{1,3})(?:°|\s)\s*(\d{1,2}(?:\.\d+)?)?['′\s]*\s*(\d{1,2}(?:\.\d+)?)?["″]?\s*([EWew])\s*$/;
 
@@ -17,6 +21,12 @@ export function parseCoordinates(input: string): Coords | null {
   const decimal = DECIMAL.exec(input);
   if (decimal) {
     return valid({ lat: Number(decimal[1]), lng: Number(decimal[2]) });
+  }
+  const hemi = DECIMAL_HEMI.exec(input);
+  if (hemi) {
+    const lat = Math.abs(Number(hemi[1])) * (/[Ss]/.test(hemi[2]!) ? -1 : 1);
+    const lng = Math.abs(Number(hemi[3])) * (/[Ww]/.test(hemi[4]!) ? -1 : 1);
+    return valid({ lat, lng });
   }
   const sexagesimal = DMS.exec(input);
   if (sexagesimal) {
