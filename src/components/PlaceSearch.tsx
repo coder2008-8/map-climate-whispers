@@ -1,19 +1,24 @@
 import { useEffect, useRef, useState } from "react";
+import { formatCoords, parseCoordinates } from "@/lib/coords";
 
 type Suggestion = { label: string; placeId: string };
 
 export default function PlaceSearch({
   onSelect,
+  onSelectCoords,
 }: {
   onSelect: (query: string) => void;
+  onSelectCoords: (coords: { lat: number; lng: number }) => void;
 }) {
   const [value, setValue] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
   const tokenRef = useRef<any>(null);
 
+  const coords = parseCoordinates(value);
+
   useEffect(() => {
-    if (value.trim().length < 3) {
+    if (coords || value.trim().length < 3) {
       setSuggestions([]);
       return;
     }
@@ -42,13 +47,19 @@ export default function PlaceSearch({
       }
     }, 250);
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   const commit = (query: string) => {
     if (!query.trim()) return;
+    const parsed = parseCoordinates(query);
     setValue(query);
     setOpen(false);
     tokenRef.current = null;
+    if (parsed) {
+      onSelectCoords(parsed);
+      return;
+    }
     onSelect(query);
   };
 
