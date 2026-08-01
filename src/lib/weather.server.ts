@@ -116,10 +116,17 @@ export async function fetchWeather(place: Place): Promise<WeatherPayload> {
   const [current, forecast, air] = await Promise.all([
     gatewayFetch(`weather/v1/currentConditions:lookup?${coords}`, {
       headers: headers(),
+    }).catch((err: Error) => {
+      if (err.message === "NOT_SUPPORTED_LOCATION") {
+        throw new Error(
+          `Google doesn't provide weather data for ${place.name} yet. Try another location.`,
+        );
+      }
+      throw err;
     }) as Promise<Record<string, any>>,
     gatewayFetch(`weather/v1/forecast/hours:lookup?${coords}&hours=12`, {
       headers: headers(),
-    }) as Promise<Record<string, any>>,
+    }).catch(() => null) as Promise<Record<string, any> | null>,
     gatewayFetch("airquality/v1/currentConditions:lookup", {
       method: "POST",
       headers: headers({ "Content-Type": "application/json" }),
@@ -129,7 +136,7 @@ export async function fetchWeather(place: Place): Promise<WeatherPayload> {
     }).catch(() => null) as Promise<Record<string, any> | null>,
   ]);
 
-  const hourly: HourPoint[] = (forecast["forecastHours"] ?? [])
+  const hourly: HourPoint[] = (forecast?.["forecastHours"] ?? [])
     .slice(0, 12)
     .map((h: any) => ({
       time: h?.interval?.startTime ?? "",
