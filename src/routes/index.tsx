@@ -192,8 +192,8 @@ function Metric({
   hint,
 }: {
   label: string;
-  value?: string | number | null;
-  hint?: string;
+  value?: string | number | null | undefined;
+  hint?: string | undefined;
 }) {
   return (
     <div className="rounded-2xl border border-border bg-secondary/40 p-4">
