@@ -36,7 +36,7 @@ function valid(c: Coords): Coords | null {
 }
 
 export function formatCoords({ lat, lng }: Coords) {
-  return `${lat.toFixed(4)}°${lat >= 0 ? "N" : "S"}, ${Math.abs(lng).toFixed(4)}°${
+  return `${Math.abs(lat).toFixed(4)}°${lat >= 0 ? "N" : "S"}, ${Math.abs(lng).toFixed(4)}°${
     lng >= 0 ? "E" : "W"
   }`;
 }
