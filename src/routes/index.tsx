@@ -53,13 +53,17 @@ function Index() {
       target.kind === "query"
         ? byQuery({ data: { query: target.query } })
         : byCoords({
-            data: { name: target.name, lat: target.lat, lng: target.lng },
+            data: {
+              ...(target.name ? { name: target.name } : {}),
+              lat: target.lat,
+              lng: target.lng,
+            },
           }),
     staleTime: 5 * 60 * 1000,
   });
 
   const activeLabel =
-    target.kind === "query" ? target.query : target.name;
+    target.kind === "query" ? target.query : (target.name ?? data?.place.name);
 
   return (
     <main className="min-h-screen bg-background text-foreground">
