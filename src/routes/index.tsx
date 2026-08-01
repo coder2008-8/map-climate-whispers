@@ -79,7 +79,11 @@ function Index() {
           </div>
           <PlaceSearch
             onSelect={(query) => setTarget({ kind: "query", query })}
+            onSelectCoords={({ lat, lng }) =>
+              setTarget({ kind: "coords", lat, lng })
+            }
           />
+
         </header>
 
         <nav className="mt-6 flex flex-wrap gap-2">
