@@ -76,12 +76,23 @@ export default function PlaceSearch({
           onChange={(e) => setValue(e.target.value)}
           onFocus={() => suggestions.length && setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Search any city…"
-          aria-label="Search any city"
+          placeholder="Search a city or coordinates…"
+          aria-label="Search a city or enter coordinates"
           className="w-full rounded-full border border-border bg-card/70 px-5 py-3 text-sm text-foreground outline-none backdrop-blur placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/40"
         />
       </form>
-      {open && suggestions.length > 0 && (
+      {coords && (
+        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-border bg-popover shadow-xl">
+          <button
+            type="button"
+            onMouseDown={() => commit(value)}
+            className="w-full px-5 py-3 text-left text-sm text-popover-foreground transition-colors hover:bg-accent"
+          >
+            Use coordinates · {formatCoords(coords)}
+          </button>
+        </div>
+      )}
+      {!coords && open && suggestions.length > 0 && (
         <ul className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-border bg-popover shadow-xl">
           {suggestions.map((s) => (
             <li key={s.placeId}>
